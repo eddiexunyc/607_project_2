@@ -1,0 +1,54 @@
+---
+title: "607_project_2"
+author: "Eddie Xu"
+date: "2023-03-04"
+output: html_document
+---
+## Project 2 - Tidying Up Data for Downstream Analysis
+
+The goal of this assignment is to give you practice in preparing different datasets for downstream
+analysis work
+
+## Load Packages
+```{r}
+library(tidyverse)
+```
+## Load Datasets from different sources
+```{r}
+# From Nick Climaco's NAFTA country 
+country_url <- (https://raw.githubusercontent.com/Nick-Climaco/Rdataset/main/nafta_countries.csv)
+
+# From Genesis Middleton county GDP data
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
