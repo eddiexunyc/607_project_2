@@ -12,7 +12,6 @@ analysis work
 ```{r}
 library(tidyverse)
 library(maps)
-library(mapproj)
 library(mapdata)
 ```
 
@@ -47,7 +46,7 @@ head(county_file)
 head(interest_file)
 ```
 
-## Data Cleaning on NAFTA Population Data
+## Data Cleaning on the NAFTA Population Dataset
 ```{r}
 # rename the column 
 colnames(country_file) <- c("ID", "Country", "1994", "1995", "1996", "1997", "1998", "1999", "2000")
@@ -59,7 +58,7 @@ country_tidy_df <- country_file %>%
 knitr::kable(country_tidy_df)
 ```
 
-## Data Analysis on NAFTA Population Data
+## Data Analysis on the NAFTA Population Dataset
 ```{r}
 # change the class of Year to numeric
 country_tidy_df$Year <- as.integer(country_tidy_df$Year)
@@ -85,8 +84,10 @@ growth_bar <- ggplot(data = subset(growth_rate, !is.na(`Population % Change`)), 
 
 growth_bar
 ```
+## Conclusion in the NAFTA Population Dataset
+Based on the graph, it shows that while Mexico have the highest growth rate among them all, the rate is getting smaller over time. Meanwhile, the US growth rate remains steady.
 
-## Data Cleaning on County GDP Data
+## Data Cleaning on the County GDP Dataset
 ```{r}
 # remove first 2 rows
 county_tidy_df <- county_file[-(1:2),]
@@ -100,6 +101,7 @@ colnames(county_tidy_df) <- c("FIPS", "County Name", "State", "Line Code", "Indu
 head(county_tidy_df, 10)
 ```
 
+## Data Analysis on the County GDP Dataset
 ```{r}
 # change the GDP column from char type to numeric
 county_tidy_df[6:9] <- lapply(county_tidy_df[6:9],as.numeric)
@@ -177,12 +179,37 @@ ggplot(industry_map, aes(x = long, y = lat, group = group, fill = `Total GDP`)) 
   geom_polygon(colour = "black")
 ```
 
-## Data Cleaning on Interest Rate
+## Conclusion on the County GDP Dataset
+In conclusion, it shows the total GDP in all industries in US and it appears that California have the highest GDP among all states.
+
+## Data Cleaning on the Interest Rate Dataset
 ```{r}
+# rename a column
+colnames(interest_file) <- c("Date", "Federal Reserve System", "European Central Bank", "Swiss National Bank", "Bank of England", "Reserve Bank of Australia", "Bank of Japan", "Bank of Brazil")
+
+head(interest_file)
+```
+
+## Data Analysis on the Interest Rate Dataset
+```{r}
+# filter the interest rate starting from the 2000
+twentyfirst_century_df <- interest_file[interest_file$Date >= "2000-01-01" & interest_file$Date <= "2022-12-31", ]
+twentyfirst_century_df$Date <- as.Date(twentyfirst_century_df$Date)
+
+# pivot longer the central banks and interest rate
+interest_rate_in_21stdata <- twentyfirst_century_df %>%
+  pivot_longer(c( "Federal Reserve System", "European Central Bank", "Swiss National Bank", "Bank of England", "Reserve Bank of Australia", "Bank of Japan", "Bank of Brazil"), names_to = "Central Bank Name", values_to = "Interest Rate")
+
+head(interest_rate_in_21stdata)
 
 ```
 
+```{r}
+ggplot(interest_rate_in_21stdata, aes(x = `Date`, y = `Interest Rate`, color = `Central Bank Name`)) +
+  geom_point() +
+  geom_hline(yintercept = 2, color = "red")
+```
 
-
-
+## Conclusion on the Interest Rate Dataset
+In conclusion, the interest rate in 21st century shows the economic situation of every central bank's home country. For economy to be in good health, the interest rate usually need to be in in the range of 0 to 2%. Given that, Bank of Brazil have high interest rate to combat their economic uncertainty. Other central banks such as Bank of England and European Central Bank have been dropping their interest rates which show economic improvement.
 
