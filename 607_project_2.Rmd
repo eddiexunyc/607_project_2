@@ -13,27 +13,74 @@ analysis work
 ```{r}
 library(tidyverse)
 ```
-## Load Datasets from different sources
+
+## Load Datasets from different sources to seperate dataframes
 ```{r}
-# From Nick Climaco's NAFTA country 
-country_url <- (https://raw.githubusercontent.com/Nick-Climaco/Rdataset/main/nafta_countries.csv)
+# From Nick Climaco's NAFTA country population
+country_url <- ("https://raw.githubusercontent.com/Nick-Climaco/Rdataset/main/nafta_countries.csv")
+country_file <- data.frame(read.csv(country_url, header = TRUE))
 
 # From Genesis Middleton county GDP data
+county_url <-("https://raw.githubusercontent.com/eddiexunyc/607_project_2/main/Resources/gdp_by_county.csv")
+county_file <- data.frame(read.csv(county_url, header = TRUE))
 
+# Interest Rate Data
+interest_rate_url <- ("https://raw.githubusercontent.com/eddiexunyc/607_project_2/main/Resources/interest_rate.csv")
+interest_file <- data.frame(read.csv(interest_rate_url, header = TRUE, sep = ";"))
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
+## View all datasets
+```{r}
+# view the country dataframe
+head(country_file)
+```
 
 ```{r}
-
+# view the county GDP dataframe
+head(county_file)
 ```
 
+```{r}
+# view the interest rate dataframe
+head(interest_file)
+```
 
+## Data Cleaning on NAFTA Population Data
+```{r}
+# rename the column 
+colnames(country_file) <- c("ID", "Country", "1994", "1995", "1996", "1997", "1998", "1999", "2000")
 
+# pivot longer the year and population
+country_tidy_df <- country_file %>%
+  pivot_longer(c("1994", "1995", "1996", "1997", "1998", "1999", "2000"), names_to = "Year", values_to = "Population")
 
+knitr::kable(country_tidy_df)
+```
 
+## Data Analysis on NAFTA Population Data
+```{r}
+# change the class of Year to numeric
+country_tidy_df$Year <- as.integer(country_tidy_df$Year)
+
+# calculate the population difference and rate of change
+growth_rate <- country_tidy_df %>%
+  group_by(Country) %>%
+  arrange(Year) %>%
+  mutate(pop_difference = Population - lag(Population),
+         rate_percent = round((pop_difference/lag(Population)) * 100, digits = 2))
+
+knitr::kable(growth_rate)
+```
+
+```{r}
+# graph a line chart of rate change in population
+colnames(growth_rate) <- c("ID", "Country", "Year", "Population", "Population Difference", "Population % Change")
+growth_bar <- ggplot(data = subset(growth_rate, !is.na(`Population % Change`)), aes(x = Year, y = `Population % Change`, fill = `Country`)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = `Population % Change`), position = position_dodge(0.9), color = "black", vjust = 1, hjust = 0.5)
+
+growth_bar
+```
 
 
 
