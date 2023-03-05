@@ -5,7 +5,6 @@ date: "2023-03-04"
 output: html_document
 ---
 ## Project 2 - Tidying Up Data for Downstream Analysis
-
 The goal of this assignment is to give you practice in preparing different datasets for downstream
 analysis work
 
@@ -69,12 +68,14 @@ growth_rate <- country_tidy_df %>%
   mutate(pop_difference = Population - lag(Population),
          rate_percent = round((pop_difference/lag(Population)) * 100, digits = 2))
 
+# rename the column
+colnames(growth_rate) <- c("ID", "Country", "Year", "Population", "Population Difference", "Population % Change")
+
 knitr::kable(growth_rate)
 ```
 
 ```{r}
 # graph a line chart of rate change in population
-colnames(growth_rate) <- c("ID", "Country", "Year", "Population", "Population Difference", "Population % Change")
 growth_bar <- ggplot(data = subset(growth_rate, !is.na(`Population % Change`)), aes(x = Year, y = `Population % Change`, fill = `Country`)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(aes(label = `Population % Change`), position = position_dodge(0.9), color = "black", vjust = 1, hjust = 0.5)
@@ -82,8 +83,19 @@ growth_bar <- ggplot(data = subset(growth_rate, !is.na(`Population % Change`)), 
 growth_bar
 ```
 
+## Data Cleaning on County GDP Data
+```{r}
+# remove first 2 rows
+county_tidy_df <- county_file[-(1:2),]
 
+# remove last 3 rows
+county_tidy_df <- county_tidy_df[-(12454:12458),]
 
+# rename the column
+colnames(county_tidy_df) <- c("FIPS", "County Name", "State", "Line Code", "Industry Name", "GDP in 2012 (thousands of dollars)", "GDP in 2013 (thousands of dollars)", "GDP in 2014 (thousands of dollars)", "GDP in 2015 (thousands of dollars)")
+
+knitr::kable(county_tidy_df)
+```
 
 
 
