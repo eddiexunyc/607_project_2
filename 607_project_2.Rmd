@@ -89,7 +89,7 @@ growth_bar
 county_tidy_df <- county_file[-(1:2),]
 
 # remove last 3 rows
-county_tidy_df <- county_tidy_df[-(12454:12458),]
+county_tidy_df <- county_tidy_df[-(12453:12458),]
 
 # rename the column
 colnames(county_tidy_df) <- c("FIPS", "County Name", "State", "Line Code", "Industry Name", "GDP in 2012 (thousands of dollars)", "GDP in 2013 (thousands of dollars)", "GDP in 2014 (thousands of dollars)", "GDP in 2015 (thousands of dollars)")
@@ -97,14 +97,29 @@ colnames(county_tidy_df) <- c("FIPS", "County Name", "State", "Line Code", "Indu
 knitr::kable(county_tidy_df)
 ```
 
+```{r}
+# change the GDP column from char type to numeric
+county_tidy_df[6:9] <- lapply(county_tidy_df[6:9],as.numeric)
+
+# calculate the sum and average of all GDPs per county
+industry_df <- county_tidy_df %>%
+  mutate(industry_total = rowSums(county_tidy_df[6:9], na.rm = TRUE),
+         industry_average_gdp = round(rowMeans(county_tidy_df[6:9], na.rm =TRUE), digits = 2))
+
+# rename the column
+colnames(industry_df[10:11]) <- c("Industry Total", "Industry Avg GDP")
+
+knitr::kable(industry_df)
+```
+
+```{r}
+#graph a line chart
+
+```
 
 
 
-
-
-
-
-
+## Data Cleaning on Interest Rate
 
 
 
