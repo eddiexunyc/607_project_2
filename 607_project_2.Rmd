@@ -11,6 +11,9 @@ analysis work
 ## Load Packages
 ```{r}
 library(tidyverse)
+library(maps)
+library(mapproj)
+library(mapdata)
 ```
 
 ## Load Datasets from different sources to seperate dataframes
@@ -94,7 +97,7 @@ county_tidy_df <- county_tidy_df[-(12453:12458),]
 # rename the column
 colnames(county_tidy_df) <- c("FIPS", "County Name", "State", "Line Code", "Industry Name", "GDP in 2012 (thousands of dollars)", "GDP in 2013 (thousands of dollars)", "GDP in 2014 (thousands of dollars)", "GDP in 2015 (thousands of dollars)")
 
-knitr::kable(county_tidy_df)
+head(county_tidy_df, 10)
 ```
 
 ```{r}
@@ -104,23 +107,80 @@ county_tidy_df[6:9] <- lapply(county_tidy_df[6:9],as.numeric)
 # calculate the sum and average of all GDPs per county
 industry_df <- county_tidy_df %>%
   mutate(industry_total = rowSums(county_tidy_df[6:9], na.rm = TRUE),
-         industry_average_gdp = round(rowMeans(county_tidy_df[6:9], na.rm =TRUE), digits = 2))
+         industry_average_gdp = round(rowMeans(county_tidy_df[6:9], na.rm =TRUE), digits = 2),
+         High_GDP = apply(county_tidy_df[6:9], 1, max, na.rm = TRUE),
+         Low_GDP = apply(county_tidy_df[6:9], 1, min, na.rm = TRUE))
 
 # rename the column
-colnames(industry_df[10:11]) <- c("Industry Total", "Industry Avg GDP")
+colnames(industry_df)[10] <- "Industry Total"
+colnames(industry_df)[11] <- "Industry Avg GDP"
+colnames(industry_df)[12] <- "Highest GDP in the County"
+colnames(industry_df)[13] <- "Lowest GDP in the County"
 
-knitr::kable(industry_df)
+head(industry_df)
 ```
 
 ```{r}
-#graph a line chart
+# summarize the industry GDP per State
+industry_plot_data <- subset(industry_df, `Industry Name` == "All Industries") %>%
+  group_by(`State`) %>%
+  summarise("Total GDP" = sum(`Industry Total`),
+            "Highest GDP" = max(`Highest GDP in the County`),
+            "Lowest GDP" = min(`Lowest GDP in the County`),
+            )
+# convert state abbreviations to name with a function [link]("https://rdrr.io/cran/usdata/src/R/abbr2state.R")
 
+abbr2state <- function(abbr){
+  ab    <- tolower(c("AL",
+             "AK", "AZ", "KS", "UT", "CO", "CT",
+             "DE", "FL", "GA", "HI", "ID", "IL",
+             "IN", "IA", "AR", "KY", "LA", "ME",
+             "MD", "MA", "MI", "MN", "MS", "MO",
+             "MT", "NE", "NV", "NH", "NJ", "NM",
+             "NY", "NC", "ND", "OH", "OK", "OR",
+             "PA", "RI", "SC", "SD", "TN", "TX",
+             "CA", "VT", "VA", "WA", "WV", "WI",
+             "WY", "DC"))
+  st    <- c("alabama",
+             "alaska", "arizona", "kansas",
+             "utah", "colorado", "connecticut",
+             "delaware", "florida", "georgia",
+             "hawaii", "idaho", "illinois",
+             "indiana", "iowa", "arkansas",
+             "kentucky", "louisiana", "maine",
+             "maryland", "massachusetts", "michigan",
+             "minnesota", "mississippi", "missouri",
+             "montana", "nebraska", "nevada",
+             "new hampshire", "new jersey", "new mexico",
+             "new york", "north carolina", "north dakota",
+             "ohio", "oklahoma", "oregon",
+             "pennsylvania", "rhode island", "south carolina",
+             "south dakota", "tennessee", "texas",
+             "california", "vermont", "virginia",
+             "washington", "west virginia", "wisconsin",
+             "wyoming", "district of columbia")
+  st[match(tolower(abbr), ab)]
+}
+
+industry_plot_data["Full Name"] <- abbr2state(industry_plot_data$State)
+
+head(industry_plot_data, 10)
 ```
 
+```{r}
+# graph a map of the industry GDP
+state <- map_data("state")
+industry_map <- merge(state, industry_plot_data, by.x = "region", by.y = "Full Name")
+industry_map <- arrange(industry_map, group, order)
 
+ggplot(industry_map, aes(x = long, y = lat, group = group, fill = `Total GDP`)) +
+  geom_polygon(colour = "black")
+```
 
 ## Data Cleaning on Interest Rate
+```{r}
 
+```
 
 
 
